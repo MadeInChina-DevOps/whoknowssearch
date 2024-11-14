@@ -1,17 +1,63 @@
-# This is only for development purposes. It is not meant for production use.
 services:
+   # PostgreSQL database service
   db:
-    container_name: whoknows-db
-    image: postgres:latest
-    restart: always
-    ports:
-      - "5432:5432"
+    image: postgres:latest       # Using latest PostgreSQL image
+    restart: always             # Ensure database is always running
     environment:
+      # Database configuration
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
+    healthcheck:                      # Add health check
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
-      -  postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data  # Persist database data
+    networks:
+      - app_network                            # Connect to internal app network
 
+  # Rocket web application service
+  app:
+    build:
+      context: .          # Build context is current directory
+      dockerfile: Dockerfile
+    restart: always       # Automatically restart container if it crashes
+    depends_on:
+      db:               # Ensure database is started before app
+        condition: service_healthy
+    environment:
+      # Rocket and application configuration
+      - ROCKET_ENV=production
+      - DATABASE_URL=postgres://postgres:postgres@db/postgres  # URL format: postgres://user:password@host/dbname
+      - ROCKET_SECRET_KEY=179430f826ca1782dc98fc142aa7364090b17f9aff22b69f2fa970255971d942
+      - STATIC_PATH=/app/static    # Path to static files inside container
+      - ROCKET_PORT=8000          # Internal port Rocket runs on
+    volumes:
+      - ./static:/app/static      # Mount static files from host to container
+    networks:
+      - app_network              # Connect to internal app network
+
+  # Nginx reverse proxy service
+  nginx:
+    image: nginx:alpine        # Using lightweight Alpine-based Nginx
+    restart: always           # Ensure proxy is always running
+    ports:
+      - "80:80"              # Map host port 80 to container port 80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Custom Nginx configuration
+      - ./static:/usr/share/nginx/html/static     # Static files for direct serving
+    depends_on:
+      - app                  # Ensure app is started before Nginx
+    networks:
+      - app_network         # Connect to internal app network
+
+# Custom bridge network for container communication
+networks:
+  app_network:
+    driver: bridge         # Using bridge driver for internal networking
+
+# Persistent volumes
 volumes:
-  postgres_data:
+  postgres_data:          # Named volume for database persistence
