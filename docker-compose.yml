@@ -45,6 +45,7 @@ services:
     restart: always           # Ensure proxy is always running
     ports:
       - "80:80"              # Map host port 80 to container port 80
+      - "443:443"            # Map host port 443 to container port 443
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Custom Nginx configuration
       - ./static:/usr/share/nginx/html/static     # Static files for direct serving
