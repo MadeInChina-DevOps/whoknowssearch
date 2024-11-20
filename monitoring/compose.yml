@@ -10,6 +10,7 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
+
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -21,5 +22,16 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=nothing2hide
     volumes:
       - ./grafana:/etc/grafana/provisioning/datasources
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - 9100:9100
+    command:
+      - '--path.procfs=/proc'
+      - '--path.sysfs=/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($|/)'
 volumes:
   prom_data:
