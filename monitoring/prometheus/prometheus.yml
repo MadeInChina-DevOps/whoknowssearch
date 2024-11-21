@@ -26,7 +26,7 @@ scrape_configs:
     scheme: http
     static_configs:
       - targets:
-          - 49.13.163.245:9100
+          - ${NODE_EXPORTER_TARGET}:${NODE_EXPORTER_PORT}
 
       - targets:
-          - localhost:9090
+          - ${PROMETHEUS_TARGET}:${PROMETHEUS_PORT}
