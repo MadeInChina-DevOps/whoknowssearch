@@ -6,11 +6,6 @@ on:
     branches:
       - monitor-production
 
-env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  MONITORING_SERVER_HOST: ${{ secrets.MONITORING_SERVER_HOST }}
-  MONITORING_SERVER_USER: ${{ secrets.MONITORING_SERVER_USER }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,33 +13,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push monitoring stack
-        uses: docker/build-push-action@v5
-        with:
-          context: ./monitoring
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:latest
-
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "${{ secrets.SSH_MONITOR_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.SSH_MONITOR_PRIVATE_KEY }}" > ~/.ssh/monitor_key
+          chmod 600 ~/.ssh/monitor_key
           echo "${{ secrets.MONITORING_SERVER_HOST }} $(cat /etc/ssh/ssh_host_ed25519_key.pub)" >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.MONITORING_SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync files
+        run: |
+          rsync -e "ssh -i ~/.ssh/monitor_key" -az \
+            --stats \
+            --human-readable \
+            --delete \
+            --progress \
+            ./monitoring/ \
+            ${{ secrets.MONITORING_SERVER_USER }}@${{ secrets.MONITORING_SERVER_HOST }}:/home/${{ secrets.MONITORING_SERVER_USER }}/monitoring/
 
       - name: Deploy to monitoring server
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.MONITORING_SERVER_USER }}@${{ secrets.MONITORING_SERVER_HOST }} '
-            cd /home/${{ secrets.MONITORING_SERVER_USER }}/monitoring && 
-            docker compose pull && 
-            docker compose up -d --force-recreate
-          '
+          ssh -i ~/.ssh/monitor_key ${{ secrets.MONITORING_SERVER_USER }}@${{ secrets.MONITORING_SERVER_HOST }} \
+            "cd ~/monitoring && docker compose down && docker compose up -d"
