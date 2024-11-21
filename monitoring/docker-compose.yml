@@ -49,3 +49,7 @@ services:
 volumes:
   prom_data:
   grafana_data:
+
+networks:
+  monitoring_internal:
+    driver: bridge
