@@ -5,6 +5,11 @@ services:
     container_name: prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+    environment:
+      - NODE_EXPORTER_TARGET=${NODE_EXPORTER_TARGET}
+      - NODE_EXPORTER_PORT=${NODE_EXPORTER_PORT}
+      - PROMETHEUS_TARGET=${PROMETHEUS_TARGET}
+      - PROMETHEUS_PORT=${PROMETHEUS_PORT}
     restart: unless-stopped
     volumes:
       - ./prometheus:/etc/prometheus
@@ -19,6 +24,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - PROMETHEUS_URL=${PROMETHEUS_URL}
     volumes:
       - ./grafana:/etc/grafana/provisioning/datasources
       - grafana_data:/var/lib/grafana
