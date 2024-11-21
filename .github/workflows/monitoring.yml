@@ -28,6 +28,7 @@ jobs:
             --human-readable \
             --delete \
             --progress \
+            --exclude='.env' \
             ./monitoring/ \
             ${{ secrets.MONITORING_SERVER_USER }}@${{ secrets.MONITORING_SERVER_HOST }}:/home/${{ secrets.MONITORING_SERVER_USER }}/monitoring/
 
