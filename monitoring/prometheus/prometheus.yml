@@ -26,5 +26,4 @@ scrape_configs:
     scheme: http
     static_configs:
       - targets:
-          - ${NODE_EXPORTER_TARGET}:${NODE_EXPORTER_PORT}
-
+          - 49.13.163.245:9100 #TODO! SHOULD BE SET AS ENV VAR OR OTHER SECURE WAY
