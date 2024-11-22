@@ -14,6 +14,7 @@ services:
       - prom_data:/prometheus
     networks:
       - monitoring_internal
+      - host_network # Allow prometheus to access the host network
 
   grafana:
     image: grafana/grafana
@@ -51,3 +52,6 @@ volumes:
 networks:
   monitoring_internal:
     driver: bridge
+  host_network:
+    external: true
+    name: host
