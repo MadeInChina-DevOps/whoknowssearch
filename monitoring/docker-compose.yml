@@ -14,8 +14,6 @@ services:
       - prom_data:/prometheus
     ports:
       - "9090:9090"
-    networks:
-      - monitoring_internal
 
   grafana:
     image: grafana/grafana
@@ -28,9 +26,9 @@ services:
     volumes:
       - ./grafana:/etc/grafana/provisioning/datasources
       - grafana_data:/var/lib/grafana
-    networks:
-      - monitoring_internal
-  
+    ports:
+      - "3000:3000"
+      
   nginx:
     image: nginx:alpine
     container_name: nginx
@@ -43,13 +41,8 @@ services:
     depends_on:
       - grafana
     restart: unless-stopped
-    networks:
-      - monitoring_internal
+
 
 volumes:
   prom_data:
   grafana_data:
-
-networks:
-  monitoring_internal:
-    driver: bridge
