@@ -8,8 +8,6 @@ services:
     environment:
       - NODE_EXPORTER_TARGET=${NODE_EXPORTER_TARGET}
       - NODE_EXPORTER_PORT=${NODE_EXPORTER_PORT}
-      - PROMETHEUS_TARGET=${PROMETHEUS_TARGET}
-      - PROMETHEUS_PORT=${PROMETHEUS_PORT}
     restart: unless-stopped
     volumes:
       - ./prometheus:/etc/prometheus

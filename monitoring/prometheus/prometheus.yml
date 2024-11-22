@@ -28,5 +28,3 @@ scrape_configs:
       - targets:
           - ${NODE_EXPORTER_TARGET}:${NODE_EXPORTER_PORT}
 
-      - targets:
-          - ${PROMETHEUS_TARGET}:${PROMETHEUS_PORT}
