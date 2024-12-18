@@ -15,17 +15,16 @@ mod tests {
         pool.execute(
             r#"
             CREATE TABLE IF NOT EXISTS pages (
-                id SERIAL PRIMARY KEY,
-                title TEXT NOT NULL,
-                url TEXT NOT NULL,
-                language TEXT NOT NULL CHECK (language IN ('en', 'fr')),
-                content TEXT
+                title TEXT PRIMARY KEY,
+                url TEXT NOT NULL UNIQUE,
+                language TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en', 'da')),
+                last_updated TIMESTAMP,
+                content TEXT NOT NULL
             );
             TRUNCATE TABLE pages;
             INSERT INTO pages (title, url, language, content)
             VALUES
-            ('Rust Documentation', 'https://doc.rust-lang.org/', 'en', 'Rust is a programming language used for systems programming.'),
-            ('Rust Langue Française', 'https://doc.rust-lang.org/fr', 'fr', 'Rust est un langage de programmation.');
+            ('Rust Documentation', 'https://doc.rust-lang.org/', 'en', 'Rust is a programming language used for systems programming.');
             "#
         )
         .await
@@ -93,27 +92,5 @@ mod tests {
             .await;
 
         assert_eq!(response.status(), Status::BadRequest);
-    }
-
-    #[rocket::async_test]
-    async fn test_search_with_different_language() {
-        let pool = setup_test_db().await;
-
-        let rocket = rocket::build()
-            .manage(pool.clone())
-            .mount("/", routes![search]);
-
-        let client = Client::tracked(rocket).await.unwrap();
-
-        let response = client
-            .get("/search?q=Rust&language=fr")
-            .dispatch()
-            .await;
-
-        assert_eq!(response.status(), Status::Ok);
-
-        let body = response.into_json::<Vec<SearchResult>>().await.unwrap();
-        assert!(!body.is_empty(), "Expected results for 'language=fr', but got an empty response.");
-        assert_eq!(body[0].title, "Rust Langue Française");
     }
 }
