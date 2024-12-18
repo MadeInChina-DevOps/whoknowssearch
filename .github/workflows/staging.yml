@@ -78,7 +78,7 @@ jobs:
 
       # Run unit tests
       - name: Run Unit and Integration Tests
-        run: cargo test --release
+        run: cargo test
 
       - name: Add SSH Private Key
         run: |
