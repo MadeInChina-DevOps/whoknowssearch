@@ -7,7 +7,7 @@
 ## configure these for your environment
 PKG="whoknows_nooneknows"                       # cargo package name
 TARGET="$(rustc -Vv | grep host | awk '{print $2}')"  # Get the host target triple
-ASSETS=("Rocket.toml" "static" "templates" "migrations", "tests") # list of assets to bundle
+ASSETS=("Rocket.toml" "static" "templates" "migrations" "tests") # list of assets to bundle
 BUILD_DIR="target/${TARGET}/release"            # cargo build directory
 DEPLOY_DIR="deploy"                             # Temporary deployment directory
 
