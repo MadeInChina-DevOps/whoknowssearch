@@ -1,8 +1,8 @@
 name: PR workflow
 
 on:
-    pull_request_target:
-        types: [opened, synchronize]
+  pull_request_target:
+    types: [opened, synchronize]
 
 jobs:
   test:
@@ -48,6 +48,27 @@ jobs:
         with:
           toolchain: nightly
           components: rustfmt, clippy
+
+      - name: Install SQLx CLI
+        run: |
+          if ! command -v sqlx &> /dev/null; then
+            cargo install sqlx-cli --no-default-features --features native-tls,postgres
+          else
+            echo "SQLx CLI is already installed"
+          fi
+
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..10}; do
+            sqlx database create && break
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+
+      - name: Run SQLx Migrations
+        run: sqlx migrate run
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Run tests
         run: cargo test
