@@ -50,6 +50,10 @@ jobs:
           toolchain: nightly
           components: rustfmt, clippy
 
+      # Run unit tests
+      - name: Run Unit and Integration Tests
+        run: cargo test
+
       - name: Install SQLx CLI
         run: |
           if ! command -v sqlx &> /dev/null; then
@@ -75,10 +79,6 @@ jobs:
         run: |
           chmod +x deploy.sh
           ./deploy.sh
-
-      # Run unit tests
-      - name: Run Unit and Integration Tests
-        run: cargo test
 
       - name: Add SSH Private Key
         run: |
