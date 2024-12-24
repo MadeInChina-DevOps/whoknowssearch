@@ -50,10 +50,6 @@ jobs:
           toolchain: nightly
           components: rustfmt, clippy
 
-      # Run unit tests
-      - name: Run Unit and Integration Tests
-        run: cargo test
-
       - name: Install SQLx CLI
         run: |
           if ! command -v sqlx &> /dev/null; then
@@ -74,6 +70,10 @@ jobs:
         run: sqlx migrate run
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      # Run unit tests
+      - name: Run Unit and Integration Tests
+        run: cargo test
 
       - name: Build the application with deploy.sh
         run: |
